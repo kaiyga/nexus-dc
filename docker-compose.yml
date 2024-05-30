@@ -23,6 +23,9 @@ services:
 
   nexus_registry:
     image: sonatype/nexus
+    environment:
+      - DOMAIN_URL=yourdomain.com
+      - DOMAIN_EMAIL=youremail@mail.com
     volumes:
       - "./data/nexus:/sonatype-work"
     networks:
