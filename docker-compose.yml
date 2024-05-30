@@ -1,31 +1,32 @@
 version: '3'
 
 services:
-  nexus_registry:
-    image: sonatype/nexus
-    volumes:
-      - "./data/nexus:/sonatype-work"
-    networks:
-      - back_network
   nginx:
     container_name: nginx
     image: nginx:1.15-alpine
     restart: unless-stopped
     volumes:
       - ./data/nginx:/etc/nginx/conf.d
-      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/cert:/etc/letsencrypt/live
       - ./data/certbot/www:/var/www/certbot
     ports:
       - "80:80"
       - "443:443"
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
   certbot:
     image: certbot/certbot
     restart: unless-stopped
     volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/cert:/etc/letsencrypt/live
       - ./data/certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+          - back_network
+
+  nexus_registry:
+    image: sonatype/nexus
+    volumes:
+      - "./data/nexus:/sonatype-work"
+    networks:
+      - back_network
 
 networks:
   back_network:
